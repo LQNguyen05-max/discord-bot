@@ -40,34 +40,6 @@ discord-bot/
    python main.py
    ```
 
-## Git Troubleshooting
-
-If you encounter errors when pushing to GitHub, such as:
-
-```
-! [rejected]        main -> main (non-fast-forward)
-error: failed to push some refs to 'https://github.com/LQNguyen05-max/discord-bot.git'
-hint: Updates were rejected because the tip of your current branch is behind
-hint: its remote counterpart. If you want to integrate the remote changes,
-hint: use 'git pull' before pushing again.
-```
-
-This means your local branch is behind the remote. To fix:
-
-1. Pull the latest changes from the remote:
-   ```
-   git pull discord-bot main
-   ```
-   If you see `fatal: refusing to merge unrelated histories`, run:
-   ```
-   git pull discord-bot main --allow-unrelated-histories
-   ```
-2. Resolve any merge conflicts if prompted.
-3. Push your changes again:
-   ```
-   git push -u discord-bot main
-   ```
-
 ## License
 
 This project is for educational purposes. Please check the repository for license details.
