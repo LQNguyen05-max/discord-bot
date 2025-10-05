@@ -1,13 +1,13 @@
 # Discord Bot Project
 
-This project is a simple Discord bot written in Python. It demonstrates basic bot setup, authentication, and usage of the Discord API, APIs for games like League of Legends, Valorant, Pokemon, TFT.
+This project is written in Python. It is designed to implemented my favorite games and make it as a discord-bot. It demonstrates basic bot setup, authentication, and usage of the Discord API, APIs for games like League of Legends, Valorant, Pokemon, TFT.
 
 <img width="1276" height="721" alt="image" src="https://github.com/user-attachments/assets/5a93579b-2698-45cd-a563-655aa6d8a33d" />
 <img width="1264" height="384" alt="image" src="https://github.com/user-attachments/assets/36225fff-16c4-41bd-b0aa-15423697ed86" />
 
 
 ## Project Structure
-
+https://trello.com/invite/b/6805659ac542339e58dc2ba0/ATTI03b2a53ca204efd753cca17580ec7a130AFC7EF0/discord-bot
 ```
 discord-bot/
 ├── main.py        # Main Python script for the bot
