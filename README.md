@@ -2,6 +2,10 @@
 
 This project is a simple Discord bot written in Python. It demonstrates basic bot setup, authentication, and usage of the Discord API, APIs for games like League of Legends, Valorant, Pokemon, TFT.
 
+<img width="1276" height="721" alt="image" src="https://github.com/user-attachments/assets/5a93579b-2698-45cd-a563-655aa6d8a33d" />
+<img width="1264" height="384" alt="image" src="https://github.com/user-attachments/assets/36225fff-16c4-41bd-b0aa-15423697ed86" />
+
+
 ## Project Structure
 
 ```
