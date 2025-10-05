@@ -7,7 +7,7 @@ This project is written in Python. It is designed to implemented my favorite gam
 
 
 ## Project Structure
-https://trello.com/invite/b/6805659ac542339e58dc2ba0/ATTI03b2a53ca204efd753cca17580ec7a130AFC7EF0/discord-bot
+[https://trello.com/invite/b/6805659ac542339e58dc2ba0/ATTI03b2a53ca204efd753cca17580ec7a130AFC7EF0/discord-bot](https://trello.com/b/UT7gipTm)
 ```
 discord-bot/
 ├── main.py        # Main Python script for the bot
