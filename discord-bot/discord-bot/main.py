@@ -6,27 +6,14 @@ from dotenv import load_dotenv
 from datetime import datetime
 from collections import Counter, defaultdict
 from bs4 import BeautifulSoup
+import re
+import asyncio
 
 load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
+# print(RIOT_API_KEY)
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
-
-# verify if bot is on
-@bot.event
-async def on_ready():
-    print("Bot ready!")
-    # print(RIOT_API_KEY)
-
-# joining members
-@bot.event
-async def on_member_join(member):
-    channel = discord.utils.get(member.guild.text_channels, name='general')
-    if channel:
-        await channel.send(f"Welcome to the monkey squad, {member.mention}!")
-    role = discord.utils.get(member.guild.roles, name='monkey')
-    if role:
-        await member.add_roles(role)
 
 # adding roles to members
 @bot.event 
@@ -101,6 +88,13 @@ async def get_summoner_info(ctx, game_name, tag_line):
     Usage: .get_summoner_info <game_name> <tag_line>
     Example: .get_summoner_info Faker KR1
     """
+    # if a message that is league-of-legends command, show them to the right channel
+    league_channel= discord.utils.get(ctx.guild.text_channels, name="league-of-legends")
+    if ctx.channel.name != "league-of-legends":
+        link = f"https://discord.com/channels/{ctx.guild.id}/{league_channel.id}"
+        await ctx.send(f"This command only works in the channel: {link}")
+        return
+
     account_url = f"https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{game_name}/{tag_line}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
     account_response = requests.get(account_url, headers=headers)
@@ -230,19 +224,56 @@ async def get_summoner_info(ctx, game_name, tag_line):
         )
     top_3_str = "\n".join(top_3_details) if top_3_details else "No data"
 
-    embed = discord.Embed(title="Summoner Info:", color=discord.Color.blue())
-    embed.set_image(url="https://cdn.discordapp.com/attachments/1422740867143438457/1423908196820455565/p1.png?ex=68e20559&is=68e0b3d9&hm=4a7f5965db1922184d947ef70b49ace8255a383c1e60ea8a315149a43fed1de2&")
+    # Get top 3 champion mastery and top mastery splash art
+    mastery_url = f"https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/{puuid}"
+    mastery_response = requests.get(mastery_url, headers=headers)
+    top3_mastery_str = "No mastery data"
+    splash_url = "https://imgix.ranker.com/list_img_v2/16641/2856641/original/2856641"  # fallback
+    champion_id_to_name = {}
+
+    # champion mapping
+    try:
+        # get the version in datadragon
+        version = requests.get("https://ddragon.leagueoflegends.com/api/versions.json").json()[0]
+        # retrieve the champion url
+        champ_data_url = f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion.json"
+        champ_data = requests.get(champ_data_url).json()["data"]
+        for champ_name, champ_info in champ_data.items():
+            champion_id_to_name[int(champ_info["key"])] = champ_name
+    except Exception as e:
+        print(f"Error fetching champion mapping: {e}")
+
+    if mastery_response.status_code == 200:
+        mastery_data = mastery_response.json()[:3]
+        top3_mastery = []
+        for idx, entry in enumerate(mastery_data):
+            champ_id = entry['championId']
+            champ_name = champion_id_to_name.get(champ_id, f"ID:{champ_id}")
+            top3_mastery.append(f"{champ_name} | Mastery Points: {entry['championPoints']}")
+            if idx == 0 and champ_name != f"ID:{champ_id}":
+                # get the splash art
+                splash_url = f"https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{champ_name}_0.jpg"
+        top3_mastery_str = "\n".join(top3_mastery) if top3_mastery else "No mastery data"
+
+    embed = discord.Embed(title="Summoner Info", color=discord.Color.blue())
+    embed.set_image(url=splash_url)
     embed.add_field(name="Summoner Name:", value=summoner_name, inline=True)
     embed.add_field(name="Summoner Level", value=summoner_level, inline=True)
     embed.add_field(name="Last Played Date", value=last_played, inline=False)
     embed.add_field(name="Ranked Stats", value=rank_msg, inline=False)
-    embed.add_field(name="Top 3 Champions within the latest 10 match", value=top_3_str, inline=False)
+    embed.add_field(name="Top 3 Champions within the latest matches", value=top_3_str, inline=False)
+    embed.add_field(name="Top 3 Champion Mastery", value=top3_mastery_str, inline=False)
     await ctx.send(embed=embed)
 
 # patch notes 
 @bot.command()
 async def patch_notes(ctx):
-    import re
+    league_channel= discord.utils.get(ctx.guild.text_channels, name="league-of-legends")
+    if ctx.channel.name != "league-of-legends":
+        link = f"https://discord.com/channels/{ctx.guild.id}/{league_channel.id}"
+        await ctx.send(f"This command only works in the channel: {link}")
+        return
+    
     url = "https://www.leagueoflegends.com/en-us/news/tags/patch-notes/"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -307,4 +338,17 @@ async def patch_notes(ctx):
 with open("discord-bot/token.txt") as file:
     token = file.read()
 
-bot.run(token)
+# load the test command files of cogs
+async def load():
+    cogs_path = os.path.join(os.path.dirname(__file__), "cogs")
+    for filename in os.listdir(cogs_path):
+        if filename.endswith(".py"):
+            await bot.load_extension(f"cogs.{filename[:-3]}")
+
+async def main():
+    async with bot:
+        await load()
+        await bot.start(token)
+
+# bot.run(token)
+asyncio.run(main())
