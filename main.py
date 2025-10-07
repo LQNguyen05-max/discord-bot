@@ -11,7 +11,8 @@ import asyncio
 
 load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
-# print(RIOT_API_KEY)
+# RIOT_API_KEY="RGAPI-a383f164-f26d-44b7-b8fd-868e2b31a626"
+print(RIOT_API_KEY)
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
@@ -99,7 +100,7 @@ async def get_summoner_info(ctx, game_name, tag_line):
     headers = {"X-Riot-Token": RIOT_API_KEY}
     account_response = requests.get(account_url, headers=headers)
     # Debug to check API response
-    # print("Account API response: ", account_response.status_code, account_response.text)
+    print("Account API response: ", account_response.status_code, account_response.text)
     if account_response.status_code == 200:
         puuid = account_response.json().get('puuid')
     else:
@@ -321,6 +322,79 @@ async def patch_notes(ctx):
         embed.set_image(url=img_url)
     await ctx.send(embed=embed)
 
+# NEED PRODUCT KEY TO DO THIS!
+# @bot.command()
+# async def ingame(ctx, game_name, tag_line):
+#     """Check stats for all players in a live game."""
+#     headers = {"X-Riot-Token": RIOT_API_KEY}
+#     # 1. get PUUID
+#     account_url = f"https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{game_name}/{tag_line}"
+#     account_response = requests.get(account_url, headers=headers)
+#     print(f"Account API: {account_url}")
+#     print(account_response.status_code, account_response.text)
+#     if account_response.status_code != 200:
+#         await ctx.send("User not found!")
+#         return
+#     puuid = account_response.json().get('puuid')
+
+#     # 2. Try all major regions for summoner lookup
+#     regions = ["na1", "euw1", "eun1", "kr", "jp1", "br1", "oc1", "tr1", "ru"]
+#     summoner_data = None
+#     region = None
+#     for reg in regions:
+#         summoner_url = f"https://{reg}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{puuid}"
+#         print(f"Trying region: {reg} | URL: {summoner_url}")
+#         summoner_response = requests.get(summoner_url, headers=headers)
+#         print(f"Summoner API [{reg}]: {summoner_response.status_code} {summoner_response.text}")
+#         if summoner_response.status_code == 200:
+#             summoner_data = summoner_response.json()
+#             region = reg
+#             break
+
+#     if not summoner_data:
+#         await ctx.send("Summoner info not found in any region!")
+#         return
+
+#     summoner_id = summoner_data.get('id')
+
+#     # 3. check for live game
+#     spectator_url = f"https://{region}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/{summoner_id}"
+#     spectator_response = requests.get(spectator_url, headers=headers)
+#     print(f"Spectator API: {spectator_url}")
+#     print(spectator_response.status_code, spectator_response.text)
+#     if spectator_response.status_code != 200:
+#         await ctx.send("This summoner is not currently in a game.")
+#         return
+
+#     game_data = spectator_response.json()
+#     participants = game_data.get('participants', [])
+
+#     # 4. gather stats for each participant
+#     embed = discord.Embed(title="Live Game Participants", color=discord.Color.blue())
+#     for p in participants:
+#         name = p.get('summonerName', 'N/A')
+#         summoner_id = p.get('summonerId')
+#         league_url = f"https://{region}.api.riotgames.com/lol/league/v4/entries/by-summoner/{summoner_id}"
+#         league_response = requests.get(league_url, headers=headers)
+#         print(f"League API: {league_url}")
+#         print(league_response.status_code, league_response.text)
+#         if league_response.status_code == 200 and league_response.json():
+#             entry = next((e for e in league_response.json() if e.get('queueType') == 'RANKED_SOLO_5x5'), None)
+#             if entry:
+#                 tier = entry.get('tier', 'N/A')
+#                 rank = entry.get('rank', 'N/A')
+#                 lp = entry.get('leaguePoints', 0)
+#                 wins = entry.get('wins', 0)
+#                 losses = entry.get('losses', 0)
+#                 winrate = round(wins / (wins + losses) * 100, 2) if (wins + losses) > 0 else 0
+#                 value = f"{tier} {rank} ({lp} LP) | {wins}W/{losses}L ({winrate}% WR)"
+#             else:
+#                 value = "Unranked"
+#         else:
+#             value = "Unranked"
+#         embed.add_field(name=name, value=value, inline=False)
+#     await ctx.send(embed=embed)
+
 # Valorant
 # Player stats
 # Patch Notes
@@ -335,7 +409,7 @@ async def patch_notes(ctx):
 # lets add some changes
 
 # open discord api 
-with open("discord-bot/token.txt") as file:
+with open("token.txt") as file:
     token = file.read()
 
 # load the test command files of cogs
